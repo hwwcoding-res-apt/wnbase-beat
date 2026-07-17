@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arrow Beat</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%239B4DFF'/%3E%3Cstop offset='1' stop-color='%23FF3B3B'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%23171025'/%3E%3Cpath d='M30 65 L50 25 L70 65 M38 50 L62 50' stroke='url(%23g)' stroke-width='9' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="bg-fx"></canvas>
+<div id="app">
+
+  <!-- SONG SELECT -->
+  <div id="screen-select" class="screen">
+    <div class="brand-wrap">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24"><path d="M7 17 L12 6 L17 17 M9 12.5 L15 12.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="brand">ARROW BEAT</div>
+        <div class="brand-sub">auto-charted rhythm game</div>
+      </div>
+    </div>
+
+    <div class="panel song-panel">
+      <div class="panel-head">
+        <span>Song Library</span>
+        <div class="upload-wrap">
+          <button type="button" class="upload-btn" id="upload-btn">
+            <svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 4v12M6 10l6-6 6 6M5 20h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Upload
+          </button>
+          <div class="upload-menu hidden" id="upload-menu">
+            <button type="button" class="upload-menu-item" id="opt-choose-file">
+              <svg viewBox="0 0 24 24" width="15" height="15"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 3v6h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Choose from computer
+            </button>
+            <button type="button" class="upload-menu-item" id="opt-paste-link">
+              <svg viewBox="0 0 24 24" width="15" height="15"><path d="M10 13a5 5 0 0 0 7.07 0l2.5-2.5a5 5 0 0 0-7.07-7.07L11 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 0 0-7.07 0l-2.5 2.5a5 5 0 0 0 7.07 7.07L13 19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Paste link
+            </button>
+          </div>
+          <input type="file" id="song-upload" accept="audio/*" multiple hidden>
+        </div>
+      </div>
+      <div class="song-list" id="song-list"></div>
+    </div>
+
+    <div class="diff-row" id="diff-row">
+      <button class="diff-btn" data-diff="easy">Easy</button>
+      <button class="diff-btn active" data-diff="normal">Normal</button>
+      <button class="diff-btn" data-diff="hard">Hard</button>
+    </div>
+
+    <button class="primary-btn" id="play-btn" disabled>
+      <svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 4l14 8-14 8V4z" fill="currentColor"/></svg>
+      Play
+    </button>
+    <div class="hint-text">Upload your own tracks — they're auto-charted and saved in your browser so they're here next time.</div>
+  </div>
+
+  <!-- LOADING / ANALYZING -->
+  <div id="screen-loading" class="screen hidden">
+    <div class="spinner"></div>
+    <div id="loading-msg">Loading track…</div>
+  </div>
+
+  <!-- GAMEPLAY -->
+  <div id="screen-game" class="screen hidden">
+    <div class="hud">
+      <div class="hud-block">
+        <div class="hud-label">Score</div>
+        <div class="hud-value" id="score-value">0</div>
+      </div>
+      <div class="hud-block">
+        <div class="hud-label">Combo</div>
+        <div class="hud-value" id="combo-value">0</div>
+      </div>
+      <div class="hud-block">
+        <div class="hud-label">Accuracy</div>
+        <div class="hud-value" id="accuracy-value">100%</div>
+      </div>
+      <div class="hud-block">
+        <div class="hud-label">Time Left</div>
+        <div class="hud-value" id="time-value">0:00</div>
+      </div>
+    </div>
+    <div class="health-row">
+      <div class="health-wrap"><div id="health-bar"></div></div>
+    </div>
+    <div class="highway-wrap">
+      <canvas id="highway" width="480" height="560"></canvas>
+    </div>
+    <div class="lane-legend">
+      <span><i class="dot" style="background:#9B4DFF"></i>Left</span>
+      <span><i class="dot" style="background:#2B8CFF"></i>Down</span>
+      <span><i class="dot" style="background:#22D65E"></i>Up</span>
+      <span><i class="dot" style="background:#FF3B3B"></i>Right</span>
+    </div>
+    <div class="controls-hint">← ↓ ↑ → to play &nbsp;·&nbsp; Esc to pause &nbsp;·&nbsp; Esc again to quit</div>
+
+    <!-- PAUSE OVERLAY -->
+    <div id="pause-overlay" class="pause-overlay hidden">
+      <div class="pause-card">
+        <div class="pause-title">Paused</div>
+        <button class="primary-btn" id="resume-btn">Resume</button>
+        <button class="secondary-btn" id="pause-quit-btn">Quit to Songs</button>
+        <div class="pause-hint">Press Esc again to quit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="screen hidden">
+    <div class="results-card">
+      <div class="results-title" id="results-song-title">Song Complete</div>
+      <div class="grade" id="results-grade">S</div>
+      <div class="result-row"><span>Score</span><span id="res-score">0</span></div>
+      <div class="result-row" id="res-best-row"><span>Best Score</span><span id="res-best">0</span></div>
+      <div class="result-row"><span>Max Combo</span><span id="res-combo">0</span></div>
+      <div class="result-row"><span>Accuracy</span><span id="res-acc">0%</span></div>
+      <div class="result-row"><span>Sick / Good / Bad / Miss</span><span id="res-judge">0/0/0/0</span></div>
+      <button class="primary-btn" id="back-btn" style="margin-top:18px;">Back to Songs</button>
+    </div>
+  </div>
+
+  <!-- PASTE LINK MODAL -->
+  <div id="link-overlay" class="pause-overlay hidden">
+    <div class="pause-card link-card">
+      <div class="pause-title" style="font-size:20px;">Paste a link</div>
+      <div class="link-hint">Paste a direct link to an mp3/audio file and it'll be downloaded and added to your library.</div>
+      <input type="text" id="link-input" class="link-input" placeholder="https://example.com/song.mp3" autocomplete="off" spellcheck="false">
+      <div id="link-status" class="link-status"></div>
+      <div class="link-btn-row">
+        <button class="primary-btn" id="link-download-btn">Download</button>
+        <button class="secondary-btn" id="link-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="db.js"></script>
+<script src="chart-generator.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
